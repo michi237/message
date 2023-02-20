@@ -1,0 +1,108 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Podgląd wiadomości{% endblock %}
+
+{% block body %}
+    <div class="kt-content  kt-grid__item kt-grid__item--fluid" id="kt_content">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="kt-portlet kt-portlet--mobile">
+
+
+                    <div class="row">
+                        <div class="col-xl-12">
+
+                            <!--begin:: Widgets/Daily Sales-->
+                            <div class="kt-portlet kt-portlet--height-fluid">
+                                <div class="kt-widget14">
+                                    <div class="kt-widget14__header kt-margin-b-30">
+                                        <div id="digital-clock"></div>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                            <!--end:: Widgets/Daily Sales-->
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-xl-12">
+
+                            <!--begin:: Widgets/Daily Sales-->
+                            <div class="kt-portlet kt-portlet--height-fluid">
+                                <div class="kt-widget14">
+                                    <div class="kt-widget14__header kt-margin-b-30">
+                                        {% for message in messages %}
+                                            <div class="messages text-center">
+                                                {{ message.message }}
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        jQuery(document).ready(function () {
+            function Time() {
+
+                // Creating object of the Date class
+                var date = new Date();
+
+                // Get current hour
+                var hour = date.getHours();
+                // Get current minute
+                var minute = date.getMinutes();
+                // Get current second
+                var second = date.getSeconds();
+
+                // Variable to store AM / PM
+                var period = "";
+
+                // Converting the hour in 12-hour format
+                if (hour == 0) {
+                    hour = 24;
+                } else {
+                    if (hour > 24) {
+                        hour = hour - 24;
+                    }
+                }
+
+                // Updating hour, minute, and second
+                // if they are less than 10
+                hour = update(hour);
+                minute = update(minute);
+                second = update(second);
+
+                // Adding time elements to the div
+                document.getElementById("digital-clock").innerText = hour + " : " + minute + " : " + second + " " + period;
+
+                // Set Timer to 1 sec (1000 ms)
+                setTimeout(Time, 1000);
+            }
+
+            // Function to update time elements if they are less than 10
+            // Append 0 before time elements if they are less than 10
+            function update(t) {
+                if (t < 10) {
+                    return "0" + t;
+                } else {
+                    return t;
+                }
+            }
+
+            Time();
+
+            setTimeout(function(){
+                window.location.reload();
+            }, 180000);
+        })
+
+
+    </script>
+{% endblock %}

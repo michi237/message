@@ -1,0 +1,82 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Strona główna{% endblock %}
+
+{% block body %}
+<div class="container">
+    <div class="col-md-12 mt-5">
+        {% if app.user %}
+            <!--begin::Portlet-->
+            <div class="kt-portlet">
+                <div class="kt-portlet__head">
+                    <div class="kt-portlet__head-label">
+                        <h3 class="kt-portlet__head-title">
+                            Nowa wiadomość
+                        </h3>
+                    </div>
+                </div>
+                <form class="kt-form kt-form--label-right" id="message-form" action=""
+                      method="post">
+                    <div class="kt-portlet__body">
+                        <div class="form-group form-group-last kt-hide">
+
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-form-label col-lg-3 col-sm-12">Nazwa</label>
+                            <div class="col-lg-9 col-md-9 col-sm-12">
+                                <input id="message-name" type="text" class="form-control" name="name"
+                                       placeholder="Wprowadź nową wiadomość" autocomplete="off">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="kt-portlet__foot">
+                        <div class="kt-form__actions">
+                            <div class="row">
+                                <div class="col-lg-9 ml-lg-auto">
+                                    <button type="submit" class="btn btn-brand save">Zapisz</button>
+                                    <button type="reset" class="btn btn-secondary">Anuluj</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        {% else %}
+            <div class="kt-portlet">
+                <div class="kt-portlet__head">
+                    <div class="kt-portlet__head-label">
+                        <h3 class="kt-portlet__head-title text-center">
+                            Zaloguj się do serwisu aby móc dodawać wiadomości!
+                        </h3>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+    <script type="text/javascript">
+        jQuery(document).ready(function () {
+            $('.btn.btn-brand.save').click(function () {
+                var message = $('#message-name').val();
+
+                var params = {
+                    'message': message,
+                };
+
+                $.ajax({
+                    url: 'public/message/add',
+                    method: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(params),
+
+                    success: function (res) {
+                        window.location.href = '/message/public/message';
+                    }
+                });
+
+                return false;
+            });
+        });
+    </script>
+    {% endblock %}

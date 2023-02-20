@@ -1,0 +1,216 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Wiadomości{% endblock %}
+
+{% block body %}
+    <div class="kt-content  kt-grid__item kt-grid__item--fluid" id="kt_content">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="kt-portlet kt-portlet--mobile">
+                    <div class="kt-portlet__head kt-portlet__head--lg">
+                        <div class="kt-portlet__head-label">
+                            <h3 class="kt-portlet__head-title">
+                                Wiadomości
+                            </h3>
+                        </div>
+
+                        <div class="kt-portlet__head-toolbar">
+                            <div class="kt-portlet__head-wrapper">
+                                <button id="reload" class="btn btn-primary" type="submit"
+                                        value="Przeładuj stronę"></button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="kt-portlet__body kt-portlet__body--fit">
+
+                        <!--begin: Datatable -->
+                        <div class="kt-datatable" id="local_data"></div>
+
+                        <!--end: Datatable -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="delete-popup" style="display: none">
+        <div class="text-delete"> Czy napewno chcesz usunąć ?</div>
+        <button class="accept-button-delete" type="submit">Tak</button>
+        <button class="reject-delete" type="reset">Nie !</button>
+    </div>
+
+    <script type="text/javascript">
+        jQuery(document).ready(function () {
+
+            $('#reload').click(function () {
+                window.location.reload();
+            })
+
+
+            var KTDatatableDataLocalDemo = function () {
+                //demo initializer
+                var demo = function () {
+                    var dataJSONArray = JSON.parse('{{ messages|json_encode|raw }}');
+
+                    var datatable = $('.kt-datatable').KTDatatable({
+                        data: {
+                            type: 'local',
+                            source: dataJSONArray,
+                            pageSize: 10,
+                        },
+                        layout: {
+                            scroll: false,
+                            footer: false,
+                        },
+                        sortable: true,
+                        pagination: true,
+                        columns: [
+                            {
+                                field: 'id',
+                                title: 'Id',
+                            },
+                            {
+                                field: 'user',
+                                title: 'Nazwa użytkownika',
+                                textAlign: 'center',
+                            },
+                            {
+                                field: 'message',
+                                title: 'Wiadomość',
+                                textAlign: 'center',
+                            },
+                            {
+                                field: 'uploaded_at',
+                                title: 'Data utworzenia',
+                                type: 'datetime',
+                                textAlign: 'center',
+                            },
+                            {
+                                field: 'is_public',
+                                title: 'Status',
+                                textAlign: 'center',
+                            },
+                            {
+                                field: 'Actions',
+                                title: ' ',
+                                sortable: false,
+                                width: 110,
+                                overflow: 'visible',
+                                autoHide: false,
+                                template: function (row) {
+                                    var data = '\
+                                            <div class="dropdown">\
+                                                <a href="javascript:;" class="btn btn-sm btn-clean btn-icon btn-icon-md" data-toggle="dropdown">\
+                                                    <i class="la la-cog kt-pr5"></i> Opcje\
+                                                </a>\
+                                                <div class="dropdown-menu dropdown-menu-right">';
+                                    if (row.is_public == true) {
+                                        data += '<a class="dropdown-item" href="view"><i class="fas fa-ban fa-1x"></i> Pokaż</a>';
+                                    }
+                                    if (row.is_public == false) {
+                                        data += '<a class="dropdown-item activ" data-message-id="' + row.id + '" href="#"><i class="fas fa-check fa-lg fa-1x"></i> Aktywuj</a>';
+
+                                    data += '<a href="#" class="dropdown-item delete-button" data-message-id="' + row.id + '"><i class="fas fa-trash fa-lg fa-1x"></i> Usuń</a>';
+                                    }
+                                    data += '</div>\
+                                            </div>\
+                                        ';
+
+                                    return data;
+                                }
+                            }
+                        ],
+                    });
+
+                    $('#kt_form_status').on('change', function () {
+                        datatable.search($(this).val().toLowerCase(), 'Status');
+                    });
+
+                    $('#kt_form_status,#kt_form_type').selectpicker();
+
+                };
+
+                return {
+                    init: function () {
+                        console.log('start')
+                        demo();
+                    },
+                };
+            }();
+            KTDatatableDataLocalDemo.init();
+
+            $('.kt-datatable').on('click', '.dropdown', function (e) {
+                $('.dropdown-item.deactive').click(function () {
+                    var messageId = $(this).data('message-id');
+
+                    $.ajax({
+                        url: 'public/message/' + messageId + '/is_public/0',
+                        method: 'GET',
+                        contentType: 'application/json',
+                        data: JSON.stringify,
+                        success: function (data) {
+                            if (data.status == true) {
+                                window.location.reload();
+                            } else {
+                                alert('blad');
+
+                            }
+                        }
+                    });
+
+                    return true;
+                });
+
+                $('.dropdown-item.activ').click(function () {
+                    var messageId = $(this).data('message-id');
+
+                    $.ajax({
+                        url: 'public/message/' + messageId + '/is_public/1',
+                        method: 'GET',
+                        contentType: 'application/json',
+                        data: JSON.stringify,
+                        success: function (data) {
+                            if (data.status == true) {
+                                window.location.reload();
+                            } else {
+                                alert('blad')
+                            }
+                        }
+                    });
+
+                    return true;
+                })
+
+                $('.dropdown-item.delete-button').click(function () {
+                    var messageId = $(this).data('message-id');
+
+                    $('.delete-popup').show()
+                    $('.reject-delete').click(function () {
+                        window.location.reload();
+
+                    })
+                    $('.accept-button-delete').click(function () {
+                        $.ajax({
+                            url: 'public/message/' + messageId + '/delete',
+                            method: 'GET',
+                            contentType: 'application/json',
+                            data: JSON.stringify,
+                            success: function (data) {
+                                if (data.status == true) {
+                                    window.location.reload();
+                                } else {
+                                    alert('błąd')
+                                    window.location.reload();
+                                }
+                            }
+                        })
+
+                    })
+
+                    return true;
+
+                })
+                return true;
+            });
+        })
+    </script>
+{% endblock %}
